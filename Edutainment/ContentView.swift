@@ -27,27 +27,30 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             Form {
-                Section {
-                    Stepper("\(timesTable.formatted())", value: $timesTable, in: 2...12, step: 1)
-                } header: {
-                    Text("Select times tables to practice")
-                }
-                
-                Section {
-                    Picker("Question amount", selection: $selectedNum) {
-                        ForEach(numQuestions, id: \.self) {
-                            Text("\($0)")
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                } header: {
-                    Text("How many questions do you want?")
-                }
-                
                 if settingUp {
+                    Section {
+                        Stepper("\(timesTable.formatted())", value: $timesTable, in: 2...12, step: 1)
+                    } header: {
+                        Text("Select times tables to practice")
+                    }
+                    
+                    Section {
+                        Picker("Question amount", selection: $selectedNum) {
+                            ForEach(numQuestions, id: \.self) {
+                                Text("\($0)")
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                    } header: {
+                        Text("How many questions do you want?")
+                    }
+                
+
                     Button {
-                        calcAnswers()
-                        settingUp.toggle()
+                        withAnimation {
+                            calcAnswers()
+                            settingUp.toggle()
+                        }
                     } label: {
                         Text("Start")
                     }
@@ -59,7 +62,9 @@ struct ContentView: View {
                         
                         ForEach(ansArray, id: \.self) { num in
                             Button {
-                                buttonTapped(num)
+                                withAnimation {
+                                    buttonTapped(num)
+                                }
                             } label: {
                                 Text("\(num)")
                             }
@@ -71,18 +76,31 @@ struct ContentView: View {
                         }
                     }
                 }
+                .toolbar {
+                    Button("End game", action: restart)
+                }
             }
             .navigationTitle("Edutainment")
         }
     }
     
     func calcAnswers() {
-        for _ in 1...4 {
-            multiplier = Int.random(in: 1..<13)
-            ans = timesTable * multiplier
-            ansArray.append(ans)
-            ansArray.shuffle()
+        var tempMults = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+        
+        multiplier = tempMults.randomElement() ?? 1
+        ans = timesTable * multiplier
+        tempMults.remove(at: multiplier - 1)
+        ansArray.append(ans)
+
+        for _ in 1...3 {
+            let dummyRand = tempMults.randomElement() ?? 1
+            let newLoc = tempMults.firstIndex(of: dummyRand)
+            
+            tempMults.remove(at: newLoc ?? 0)
+            ansArray.append(timesTable * dummyRand)
         }
+        
+        ansArray.shuffle()
     }
     
     func buttonTapped(_ num: Int) {
