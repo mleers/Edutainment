@@ -25,27 +25,40 @@ struct ContentView: View {
     
     
     var body: some View {
-        NavigationView {
-            Form {
+        ZStack {
+            Image("mountains")
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(maxWidth: UIScreen.main.bounds.width,
+                       maxHeight: UIScreen.main.bounds.height)
+            VStack(spacing: 50) {
                 if settingUp {
-                    Section {
-                        Stepper("\(timesTable.formatted())", value: $timesTable, in: 2...12, step: 1)
-                    } header: {
+                    VStack {
+                        Spacer()
+                        Text("Multiplication Practice")
+                            .font(.system(size: 30, weight: .semibold, design: .rounded))
+                            
+                        Spacer()
+                        Spacer()
                         Text("Select times tables to practice")
+                            .font(.title2)
+                        Stepper("\(timesTable.formatted())", value: $timesTable, in: 2...12, step: 1)
                     }
                     
-                    Section {
+                    VStack {
+                        Spacer()
+                        Text("How many questions do you want?")
+                            .font(.title2)
                         Picker("Question amount", selection: $selectedNum) {
                             ForEach(numQuestions, id: \.self) {
                                 Text("\($0)")
                             }
                         }
                         .pickerStyle(.segmented)
-                    } header: {
-                        Text("How many questions do you want?")
+                        .colorMultiply(selectedNum == 5 ? .green : .green)
+                        Spacer()
                     }
                 
-
                     Button {
                         withAnimation {
                             calcAnswers()
@@ -53,34 +66,71 @@ struct ContentView: View {
                         }
                     } label: {
                         Text("Start")
+                            .font(.headline)
+                            .frame(width: 100, height: 50)
+                            .foregroundColor(Color.white)
+                            .background(Color.red)
+                            .clipShape(RoundedRectangle(cornerRadius: 20))
                     }
+                    Spacer()
                 }
                 
-                Section {
+                VStack {
                     if !settingUp {
-                        Text("What is \(timesTable) x \(multiplier)")
-                        
-                        ForEach(ansArray, id: \.self) { num in
-                            Button {
-                                withAnimation {
-                                    buttonTapped(num)
+                        Spacer()
+                        Spacer()
+                        Text("What is \(timesTable) x \(multiplier)?")
+                            .font(.system(size: 30, weight: .semibold, design: .rounded))
+                        Spacer()
+                        HStack(spacing: 35) {
+                            ForEach(ansArray, id: \.self) { num in
+                                Button {
+                                    withAnimation {
+                                        buttonTapped(num)
+                                    }
+                                } label: {
+                                    Text("\(num)")
+                                        .font(.headline)
+                                        .frame(width: 65, height: 65)
+                                        .foregroundColor(Color.black)
+                                        .background(Color.green)
+                                        .clipShape(Circle())
                                 }
-                            } label: {
-                                Text("\(num)")
-                            }
-                            .alert("Game over!", isPresented: $gameOver) {
-                                Button("New game", action: restart)
-                            } message: {
-                                Text("Score is \(score)/\(selectedNum)")
+                                .alert("Game over!", isPresented: $gameOver) {
+                                    withAnimation {
+                                        Button("New game", action: restart)
+                                    }
+                                } message: {
+                                    Text("Score is \(score)/\(selectedNum)")
+                                }
                             }
                         }
+                        HStack(spacing: 30) {
+                            Image("rabbit")
+                                .resizable()
+                                .frame(width: 70, height: 70)
+                            Image("owl")
+                                .resizable()
+                                .frame(width: 70, height: 70)
+                            Image("duck")
+                                .resizable()
+                                .frame(width: 70, height: 70)
+                            Image("buffalo")
+                                .resizable()
+                                .frame(width: 70, height: 70)
+                        }
+                        Spacer()
+                        Button("End game", action: restart)
+                            .font(.headline)
+                            .frame(width: 100, height: 50)
+                            .foregroundColor(Color.white)
+                            .background(Color.red)
+                            .clipShape(RoundedRectangle(cornerRadius: 20))
+                        Spacer()
                     }
                 }
-                .toolbar {
-                    Button("End game", action: restart)
-                }
             }
-            .navigationTitle("Edutainment")
+            .padding(.horizontal, 20)
         }
     }
     
@@ -124,7 +174,9 @@ struct ContentView: View {
         score = 0
         round = 0
         ansArray.removeAll()
-        settingUp.toggle()
+        withAnimation {
+            settingUp.toggle()
+        }
     }
     
 }
